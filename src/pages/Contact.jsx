@@ -1,11 +1,27 @@
-import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const revealVariant = {
     hidden: { opacity: 0, y: 30 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] } }
 };
 
+const formStepVariant = {
+    hidden: { opacity: 0, x: 20 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.5, ease: "easeOut" } },
+    exit: { opacity: 0, x: -20, transition: { duration: 0.3, ease: "easeIn" } }
+};
+
 const Contact = () => {
+    const [step, setStep] = useState(1);
+    
+    const nextStep = () => setStep(prev => Math.min(prev + 1, 3));
+    const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        alert("Booking request sent! Our concierge will contact you shortly.");
+    };
+
     return (
         <div className="w-full">
             {/* Hero Section */}
@@ -34,42 +50,128 @@ const Contact = () => {
             {/* Contact & Reservation Grid */}
             <section className="px-6 lg:px-12 max-w-screen-2xl mx-auto mb-32">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24">
-                    {/* Left: Form */}
+                    {/* Left: Form Widget */}
                     <motion.div 
-                        className="lg:col-span-7 bg-surface-container-low p-8 lg:p-12 rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-outline-variant/10"
+                        className="lg:col-span-7 bg-surface-container-low p-8 lg:p-12 rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-outline-variant/10 relative overflow-hidden"
                         initial="hidden" whileInView="visible" viewport={{ once: true }} variants={revealVariant} transition={{ delay: 0.1 }}
                     >
-                        <h2 className="text-3xl font-headline mb-12">Inquiry & Reservation</h2>
-                        <form className="space-y-12">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                                <div className="relative group">
-                                    <label className="block text-[10px] uppercase tracking-[0.2em] text-outline mb-2 font-label group-focus-within:text-primary transition-colors">Your Name</label>
-                                    <input className="w-full bg-transparent border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary py-3 transition-all placeholder:text-outline-variant/40 font-body outline-none" placeholder="Julianne Vane" type="text" />
-                                </div>
-                                <div className="relative group">
-                                    <label className="block text-[10px] uppercase tracking-[0.2em] text-outline mb-2 font-label group-focus-within:text-primary transition-colors">Email Address</label>
-                                    <input className="w-full bg-transparent border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary py-3 transition-all placeholder:text-outline-variant/40 font-body outline-none" placeholder="concierge@curated.com" type="email" />
-                                </div>
+                        {/* Progress Bar */}
+                        <div className="absolute top-0 left-0 h-1 bg-primary/20 w-full">
+                            <motion.div 
+                                className="h-full bg-primary"
+                                initial={{ width: "33%" }}
+                                animate={{ width: `${(step / 3) * 100}%` }}
+                                transition={{ duration: 0.5, ease: "easeInOut" }}
+                            />
+                        </div>
+
+                        <div className="flex justify-between items-center mb-12">
+                            <h2 className="text-3xl font-headline">Inquiry & Reservation</h2>
+                            <span className="font-label text-[10px] uppercase tracking-widest text-outline">Step {step} of 3</span>
+                        </div>
+                        
+                        <form className="space-y-12" onSubmit={handleSubmit}>
+                            <div className="min-h-[220px]">
+                                <AnimatePresence mode="wait">
+                                    {step === 1 && (
+                                        <motion.div 
+                                            key="step1" 
+                                            variants={formStepVariant} 
+                                            initial="hidden" animate="visible" exit="exit"
+                                            className="grid grid-cols-1 md:grid-cols-2 gap-12"
+                                        >
+                                            <div className="relative group">
+                                                <label className="block text-[10px] uppercase tracking-[0.2em] text-outline mb-2 font-label group-focus-within:text-primary transition-colors">Party Size</label>
+                                                <select className="w-full bg-transparent border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary py-3 transition-all font-body text-on-surface-variant outline-none appearance-none">
+                                                    {[1,2,3,4,5,6,7,8,"9+"].map(n => <option key={n} value={n}>{n} Guests</option>)}
+                                                </select>
+                                                <span className="material-symbols-outlined absolute right-0 bottom-3 text-outline-variant pointer-events-none">expand_more</span>
+                                            </div>
+                                            <div className="relative group">
+                                                <label className="block text-[10px] uppercase tracking-[0.2em] text-outline mb-2 font-label group-focus-within:text-primary transition-colors">Preferred Date</label>
+                                                <input className="w-full bg-transparent border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary py-3 transition-all font-body text-on-surface-variant outline-none" type="date" />
+                                            </div>
+                                        </motion.div>
+                                    )}
+
+                                    {step === 2 && (
+                                        <motion.div 
+                                            key="step2" 
+                                            variants={formStepVariant} 
+                                            initial="hidden" animate="visible" exit="exit"
+                                            className="space-y-8"
+                                        >
+                                            <label className="block text-[10px] uppercase tracking-[0.2em] text-outline mb-2 font-label">Select Time Slot</label>
+                                            <div className="grid grid-cols-3 gap-4">
+                                                {['18:00', '18:30', '19:00', '19:30', '20:00', '20:30'].map(time => (
+                                                    <div key={time} className="border border-outline-variant/30 rounded-lg py-3 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-all font-body text-on-surface-variant">
+                                                        {time}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <p className="text-xs text-outline-variant font-body italic flex items-center gap-2">
+                                                <span className="material-symbols-outlined text-[14px]">info</span> All dinner seatings are allocated 2.5 hours.
+                                            </p>
+                                        </motion.div>
+                                    )}
+
+                                    {step === 3 && (
+                                        <motion.div 
+                                            key="step3" 
+                                            variants={formStepVariant} 
+                                            initial="hidden" animate="visible" exit="exit"
+                                            className="space-y-12"
+                                        >
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                                                <div className="relative group">
+                                                    <label className="block text-[10px] uppercase tracking-[0.2em] text-outline mb-2 font-label group-focus-within:text-primary transition-colors">Your Name</label>
+                                                    <input className="w-full bg-transparent border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary py-3 transition-all placeholder:text-outline-variant/40 font-body outline-none" placeholder="Julianne Vane" type="text" required/>
+                                                </div>
+                                                <div className="relative group">
+                                                    <label className="block text-[10px] uppercase tracking-[0.2em] text-outline mb-2 font-label group-focus-within:text-primary transition-colors">Email Address</label>
+                                                    <input className="w-full bg-transparent border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary py-3 transition-all placeholder:text-outline-variant/40 font-body outline-none" placeholder="concierge@curated.com" type="email" required/>
+                                                </div>
+                                            </div>
+                                            <div className="relative group">
+                                                <label className="block text-[10px] uppercase tracking-[0.2em] text-outline mb-2 font-label group-focus-within:text-primary transition-colors">Message or Dietary Notes</label>
+                                                <textarea className="w-full bg-transparent border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary py-3 transition-all placeholder:text-outline-variant/40 resize-none font-body outline-none" placeholder="How may we curate your experience?" rows="2"></textarea>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                                <div className="relative group">
-                                    <label className="block text-[10px] uppercase tracking-[0.2em] text-outline mb-2 font-label group-focus-within:text-primary transition-colors">Preferred Date</label>
-                                    <input className="w-full bg-transparent border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary py-3 transition-all font-body text-on-surface-variant outline-none" type="date" />
-                                </div>
-                                <div className="relative group">
-                                    <label className="block text-[10px] uppercase tracking-[0.2em] text-outline mb-2 font-label group-focus-within:text-primary transition-colors">Time & Guests</label>
-                                    <input className="w-full bg-transparent border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary py-3 transition-all placeholder:text-outline-variant/40 font-body outline-none" placeholder="19:30, 2 Guests" type="text" />
-                                </div>
-                            </div>
-                            <div className="relative group">
-                                <label className="block text-[10px] uppercase tracking-[0.2em] text-outline mb-2 font-label group-focus-within:text-primary transition-colors">Message or Dietary Notes</label>
-                                <textarea className="w-full bg-transparent border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary py-3 transition-all placeholder:text-outline-variant/40 resize-none font-body outline-none" placeholder="How may we curate your experience?" rows="3"></textarea>
-                            </div>
-                            <div className="pt-4">
-                                <button className="bg-primary text-on-primary px-12 py-4 rounded-full font-serif tracking-wide text-lg transition-all hover:bg-on-surface hover:scale-[1.02] flex items-center justify-between min-w-[260px] group shadow-lg shadow-primary/10" type="button">
-                                    <span>Send Inquiry</span>
-                                    <span className="material-symbols-outlined transition-transform group-hover:translate-x-1">arrow_forward</span>
-                                </button>
+
+                            <div className="pt-4 flex items-center justify-between border-t border-outline-variant/10 pb-2">
+                                {step > 1 ? (
+                                    <button 
+                                        type="button" 
+                                        onClick={prevStep}
+                                        className="text-on-surface-variant font-label text-xs uppercase tracking-widest hover:text-primary transition-colors flex items-center gap-2"
+                                    >
+                                        <span className="material-symbols-outlined text-[16px]">arrow_back</span> Back
+                                    </button>
+                                ) : (
+                                    <div></div>
+                                )}
+
+                                {step < 3 ? (
+                                    <button 
+                                        type="button" 
+                                        onClick={nextStep}
+                                        className="bg-primary text-on-primary px-8 py-3 rounded-full font-serif tracking-wide text-md transition-all hover:bg-on-surface hover:scale-[1.02] flex items-center gap-4 shadow-lg shadow-primary/10"
+                                    >
+                                        <span>Continue</span>
+                                        <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                                    </button>
+                                ) : (
+                                    <button 
+                                        type="submit" 
+                                        className="bg-secondary text-on-secondary px-8 py-3 rounded-full font-serif tracking-wide text-md transition-all hover:bg-on-surface hover:scale-[1.02] flex items-center gap-4 shadow-lg shadow-secondary/20"
+                                    >
+                                        <span>Confirm Request</span>
+                                        <span className="material-symbols-outlined text-[18px]">check</span>
+                                    </button>
+                                )}
                             </div>
                         </form>
                     </motion.div>

@@ -1,11 +1,14 @@
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 
 const revealVariant = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] } }
+    hidden: { opacity: 0, y: 30, filter: "blur(5px)" },
+    visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] } }
 };
 
 const About = () => {
+    const { scrollY } = useScroll();
+    const yHero = useTransform(scrollY, [0, 1000], [0, 200]);
+
     return (
         <div className="w-full">
             {/* Hero Section */}
@@ -24,11 +27,16 @@ const About = () => {
                         </p>
                     </motion.div>
                     <motion.div 
-                        className="lg:col-span-5 relative"
+                        className="lg:col-span-5 relative overflow-hidden rounded-xl shadow-2xl"
                         initial="hidden" animate="visible" variants={revealVariant} transition={{ delay: 0.2 }}
                     >
-                        <div className="aspect-[4/5] overflow-hidden rounded-xl shadow-2xl relative z-10">
-                            <img alt="Minimalist gourmet plating" className="w-full h-full object-cover grayscale-[20%] hover:grayscale-0 transition-all duration-1000" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6rHB2QxU-kjqQF6h4Louug9ieP47IoY695qt_4jWIe3C1WY0XL_KZLHIUtRJyAkDqATW6l6GOf-pHG6vf_lIFHCnwFQNn8yUAs7gupiIKHbKurygvmhm3FRr3LsEwrfH4exSbBLxAw9d6w5yqIo1vOV3gP17k8iYP4hZN2qvs5Frxj0Qq9IpCCXMVdHeKaHvLupSl5CHq3apgG4jlMTDW0vhpTTVRDw4qPg9g0QKUPbJH8GTXow24rintKzzY_1cJlYGiohUeXPs" />
+                        <div className="aspect-[4/5] relative z-10 w-full h-full pb-[125%]">
+                            <motion.img 
+                                style={{ y: yHero, scale: 1.25 }}
+                                alt="Minimalist gourmet plating" 
+                                className="absolute top-0 left-0 w-full h-full object-cover grayscale-[20%] hover:grayscale-0 transition-all duration-1000" 
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6rHB2QxU-kjqQF6h4Louug9ieP47IoY695qt_4jWIe3C1WY0XL_KZLHIUtRJyAkDqATW6l6GOf-pHG6vf_lIFHCnwFQNn8yUAs7gupiIKHbKurygvmhm3FRr3LsEwrfH4exSbBLxAw9d6w5yqIo1vOV3gP17k8iYP4hZN2qvs5Frxj0Qq9IpCCXMVdHeKaHvLupSl5CHq3apgG4jlMTDW0vhpTTVRDw4qPg9g0QKUPbJH8GTXow24rintKzzY_1cJlYGiohUeXPs" 
+                            />
                         </div>
                         <div className="absolute -bottom-12 -left-12 w-64 h-64 bg-secondary-container rounded-xl -z-10 hidden lg:block opacity-50"></div>
                     </motion.div>
